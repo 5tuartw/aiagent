@@ -49,20 +49,21 @@ while iterations < max_iterations:
             system_instruction=system_prompt),
     )
     if response.function_calls != None:
+        function_response_parts_for_turn = []
         for function_call_part in response.function_calls:
             print(f"Calling function: {function_call_part.name}({function_call_part.args})")
-            function_call_result = call_function(function_call_part, verbose)
-            #print(f"-> {function_call_result.parts[0].function_response.response}")
-            messages.append(function_call_result)
+            individual_function_results_content = call_function(function_call_part, verbose)
+            function_response_parts_for_turn.extend(individual_function_results_content.parts)
+        
+        messages.append(
+            types.Content(
+                role="function",
+                parts=function_response_parts_for_turn
+            )
+        )
         iterations += 1
     else:
         print(response.text)
-
-
-
-#else:
-#    print(response.text)
-
 
 #if verbose:
 #    print(f"User prompt: {user_prompt}")
